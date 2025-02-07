@@ -163,3 +163,49 @@ export default defineConfig({
   }
 })
 ```
+
+# AI Blog Agent
+
+Ein interaktiver Blog mit KI-Chat-Funktionalität, entwickelt mit React und Vite.
+
+## Features
+
+- Responsive Blog-Layout
+- Integriertes Chat-Widget
+- Echtzeit-Interaktion mit Nutzern
+- Moderne UI mit optimierter UX
+
+## Technologien
+
+- React 18
+- Vite
+- CSS3
+- JavaScript (ES6+)
+
+## Installation
+
+1. Repository klonen:
+```bash
+git clone [repository-url]
+```
+
+2. Abhängigkeiten installieren:
+```bash
+npm install
+```
+
+3. Entwicklungsserver starten:
+```bash
+npm run dev
+```
+
+## Entwicklung
+
+Das Projekt verwendet:
+- Vite als Build-Tool
+- React für die UI-Komponenten
+- CSS Modules für das Styling
+
+## Lizenz
+
+MIT
