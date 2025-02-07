@@ -29,25 +29,49 @@ const ChatWidget = () => {
 
   // OpenAI Client Initialisierung
   const getOpenAIClient = () => {
-    if (!apiKey || apiKey === 'your-api-key-here') return null;
+    if (!apiKey || apiKey === 'your-api-key-here') {
+      console.error('Kein gültiger API-Key vorhanden');
+      return null;
+    }
+
+    // Überprüfe das API-Key Format
+    if (!apiKey.startsWith('sk-') && !apiKey.startsWith('sk-proj-')) {
+      console.error('Ungültiges API-Key Format. Der Key muss mit "sk-" oder "sk-proj-" beginnen');
+      setError('Ungültiger API-Key. Bitte verwenden Sie einen gültigen OpenAI API-Key.');
+      return null;
+    }
     
-    // Erstelle eine neue Instanz für jeden Request
-    return new OpenAI({
-      apiKey: apiKey,
-      dangerouslyAllowBrowser: true
-    });
+    try {
+      console.log('Initialisiere OpenAI Client...');
+      const client = new OpenAI({
+        apiKey: apiKey,
+        dangerouslyAllowBrowser: true
+      });
+      console.log('OpenAI Client erfolgreich initialisiert');
+      return client;
+    } catch (error) {
+      console.error('Fehler bei der OpenAI Client-Initialisierung:', error);
+      return null;
+    }
   };
 
   // API Key Handler
   const handleApiKeySubmit = (e) => {
     e.preventDefault();
-    if (apiKey.trim() && apiKey !== 'your-api-key-here') {
-      localStorage.setItem('openai_api_key', apiKey);
-      setShowApiKeyInput(false);
-      setError(null);
-    } else {
+    if (!apiKey.trim() || apiKey === 'your-api-key-here') {
       setError('Bitte geben Sie einen gültigen API-Key ein');
+      return;
     }
+
+    // Überprüfe das API-Key Format
+    if (!apiKey.startsWith('sk-') && !apiKey.startsWith('sk-proj-')) {
+      setError('Ungültiger API-Key. Bitte verwenden Sie einen gültigen OpenAI API-Key.');
+      return;
+    }
+
+    localStorage.setItem('openai_api_key', apiKey);
+    setShowApiKeyInput(false);
+    setError(null);
   };
 
   const handleApiKeyChange = (e) => {
@@ -257,6 +281,8 @@ const ChatWidget = () => {
     }
 
     try {
+      console.log('API-Key vorhanden:', !!apiKey);
+      console.log('OpenAI Client initialisiert:', !!openai);
       console.log('Sende Anfrage an OpenAI mit folgendem Kontext:', pageContent);
       
       // Erstelle das messages Array mit dem kompletten Chatverlauf
@@ -264,6 +290,8 @@ const ChatWidget = () => {
         role: msg.sender === 'user' ? 'user' : 'assistant',
         content: msg.text
       }));
+
+      console.log('Chat History:', chatHistory);
       
       const completion = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
@@ -301,14 +329,26 @@ const ChatWidget = () => {
         ]
       });
 
+      console.log('OpenAI Antwort erhalten:', completion);
+
       if (completion.choices && completion.choices[0] && completion.choices[0].message) {
         return completion.choices[0].message.content;
       } else {
+        console.error('Unerwartetes Antwortformat:', completion);
         throw new Error('Unerwartetes Antwortformat von der API');
       }
     } catch (error) {
-      console.error('Fehler bei der OpenAI Anfrage:', error);
-      setError('Fehler bei der Anfrage an OpenAI. Bitte überprüfen Sie Ihren API-Key.');
+      console.error('Detaillierter Fehler bei der OpenAI Anfrage:', {
+        message: error.message,
+        status: error.status,
+        response: error.response,
+        stack: error.stack
+      });
+      if (error.response) {
+        setError(`OpenAI API Fehler: ${error.response.status} - ${error.response.statusText}`);
+      } else {
+        setError(`Fehler bei der Anfrage an OpenAI: ${error.message}. Bitte überprüfen Sie Ihren API-Key und die Internetverbindung.`);
+      }
       return null;
     }
   };
@@ -352,7 +392,7 @@ const ChatWidget = () => {
 
   return (
     <div className="chat-widget">
-      {showApiKeyInput && (
+      {showApiKeyInput ? (
         <div className="api-key-form">
           <form onSubmit={handleApiKeySubmit}>
             <input
@@ -366,6 +406,10 @@ const ChatWidget = () => {
               API-Key speichern
             </button>
           </form>
+        </div>
+      ) : (
+        <div className="api-key-icon" onClick={() => setShowApiKeyInput(true)} title="API-Key ändern">
+          🔑
         </div>
       )}
       
