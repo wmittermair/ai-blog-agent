@@ -6,7 +6,8 @@ export default defineConfig({
   plugins: [react()],
   base: '/ai-blog-agent/',
   build: {
-    outDir: 'docs'
+    outDir: 'docs',
+    sourcemap: true
   },
   server: {
     fs: {

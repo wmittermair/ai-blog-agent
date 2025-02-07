@@ -166,7 +166,7 @@ export default defineConfig({
 
 # AI Blog Agent
 
-Ein interaktiver Blog mit KI-Chat-Funktionalität, entwickelt mit React und Vite.
+Ein interaktiver Chat-Widget für Blog-Artikel, der mit OpenAI API arbeitet.
 
 ## Features
 
@@ -182,11 +182,12 @@ Ein interaktiver Blog mit KI-Chat-Funktionalität, entwickelt mit React und Vite
 - CSS3
 - JavaScript (ES6+)
 
-## Installation
+## Entwicklung
 
 1. Repository klonen:
 ```bash
-git clone [repository-url]
+git clone https://github.com/yourusername/ai-blog-agent.git
+cd ai-blog-agent
 ```
 
 2. Abhängigkeiten installieren:
@@ -194,17 +195,29 @@ git clone [repository-url]
 npm install
 ```
 
-3. Entwicklungsserver starten:
+3. Umgebungsvariablen einrichten:
+- `.env.example` zu `.env` kopieren
+- OpenAI API Key in `.env` eintragen
+
+4. Entwicklungsserver starten:
 ```bash
 npm run dev
 ```
 
-## Entwicklung
+## Deployment
 
-Das Projekt verwendet:
-- Vite als Build-Tool
-- React für die UI-Komponenten
-- CSS Modules für das Styling
+Die Anwendung wird automatisch auf GitHub Pages deployed, wenn Änderungen in den `main` Branch gepusht werden.
+
+### Lokales Build
+
+```bash
+npm run build
+```
+
+### API Key Konfiguration
+
+- Für die lokale Entwicklung: API Key in `.env` Datei speichern
+- Für die produktive Version: API Key im Browser eingeben (wird im localStorage gespeichert)
 
 ## Lizenz
 
