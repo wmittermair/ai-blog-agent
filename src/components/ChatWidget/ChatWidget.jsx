@@ -252,6 +252,12 @@ const ChatWidget = () => {
     try {
       console.log('Sende Anfrage an OpenAI mit folgendem Kontext:', pageContent);
       
+      // Erstelle das messages Array mit dem kompletten Chatverlauf
+      const chatHistory = messages.map(msg => ({
+        role: msg.sender === 'user' ? 'user' : 'assistant',
+        content: msg.text
+      }));
+      
       const completion = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
         messages: [
@@ -280,7 +286,7 @@ const ChatWidget = () => {
                      Hier ist der aktuelle Artikelinhalt als Kontext:
                      ${pageContent}`
           },
-          ...messages,
+          ...chatHistory,
           {
             role: "user",
             content: userMessage
@@ -288,7 +294,11 @@ const ChatWidget = () => {
         ]
       });
 
-      return completion.choices[0].message.content;
+      if (completion.choices && completion.choices[0] && completion.choices[0].message) {
+        return completion.choices[0].message.content;
+      } else {
+        throw new Error('Unerwartetes Antwortformat von der API');
+      }
     } catch (error) {
       console.error('Fehler bei der OpenAI Anfrage:', error);
       setError('Fehler bei der Anfrage an OpenAI. Bitte überprüfen Sie Ihren API-Key.');
@@ -306,7 +316,7 @@ const ChatWidget = () => {
       }
 
       const userMessage = inputText.trim();
-      setMessages([...messages, { text: userMessage, sender: 'user' }]);
+      setMessages(prevMessages => [...prevMessages, { text: userMessage, sender: 'user' }]);
       setIsLoading(true);
       setError(null);
       console.log('Nachricht wird gesendet...');
@@ -315,14 +325,14 @@ const ChatWidget = () => {
       const response = await generateResponse(userMessage);
       console.log('Erhaltene Antwort:', response);
       
-      if (typeof response === 'string') {
-        setMessages(prev => [...prev, { 
+      if (response) {
+        setMessages(prevMessages => [...prevMessages, { 
           text: response, 
           sender: 'bot' 
         }]);
         console.log('Antwort wurde zum Chat hinzugefügt');
       } else {
-        throw new Error('Unerwartetes Antwortformat von der API');
+        throw new Error('Keine gültige Antwort von der API erhalten');
       }
 
     } catch (err) {
