@@ -12,22 +12,26 @@ const ChatWidget = () => {
     // Versuche zuerst den API-Key aus der Umgebungsvariable zu laden
     const envKey = import.meta.env.VITE_OPENAI_API_KEY;
     // Wenn kein Umgebungs-Key existiert, versuche aus localStorage zu laden
-    if (!envKey) {
-      return localStorage.getItem('openai_api_key') || '';
+    if (!envKey || envKey === 'your-api-key-here') {
+      const storedKey = localStorage.getItem('openai_api_key');
+      return storedKey && storedKey !== 'your-api-key-here' ? storedKey : '';
     }
     return envKey;
   });
   const [showApiKeyInput, setShowApiKeyInput] = useState(() => {
-    // Zeige das Eingabefeld nur, wenn weder ein Umgebungs-Key noch ein localStorage-Key existiert
-    return !import.meta.env.VITE_OPENAI_API_KEY && !localStorage.getItem('openai_api_key');
+    // Zeige das Eingabefeld nur, wenn kein gültiger Key vorhanden ist
+    const envKey = import.meta.env.VITE_OPENAI_API_KEY;
+    const storedKey = localStorage.getItem('openai_api_key');
+    return (!envKey || envKey === 'your-api-key-here') && (!storedKey || storedKey === 'your-api-key-here');
   });
   const chatMessagesRef = useRef(null);
   const [pageContent, setPageContent] = useState('');
 
   // OpenAI Client Initialisierung
   const getOpenAIClient = () => {
-    if (!apiKey) return null;
+    if (!apiKey || apiKey === 'your-api-key-here') return null;
     
+    // Erstelle eine neue Instanz für jeden Request
     return new OpenAI({
       apiKey: apiKey,
       dangerouslyAllowBrowser: true
@@ -37,15 +41,18 @@ const ChatWidget = () => {
   // API Key Handler
   const handleApiKeySubmit = (e) => {
     e.preventDefault();
-    if (apiKey.trim()) {
+    if (apiKey.trim() && apiKey !== 'your-api-key-here') {
       localStorage.setItem('openai_api_key', apiKey);
       setShowApiKeyInput(false);
       setError(null);
+    } else {
+      setError('Bitte geben Sie einen gültigen API-Key ein');
     }
   };
 
   const handleApiKeyChange = (e) => {
-    setApiKey(e.target.value);
+    const newKey = e.target.value.trim();
+    setApiKey(newKey);
   };
 
   const extractPageContent = () => {

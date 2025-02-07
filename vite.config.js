@@ -7,7 +7,14 @@ export default defineConfig({
   base: '/ai-blog-agent/',
   build: {
     outDir: 'docs',
-    sourcemap: true
+    sourcemap: true,
+    rollupOptions: {
+      output: {
+        format: 'es',
+        compact: true,
+        banner: 'const ENV_VARS = {};'
+      }
+    }
   },
   server: {
     fs: {
